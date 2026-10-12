@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const LOADING_STAGES = [
   'Ingesting notes and isolating key concepts...',
-  'Prompting local Gemma model (gemma3:4b)...',
+  'Prompting local Gemma model (gemma4)...',
   'Crafting 5 targeted multiple-choice questions with 4 options...',
   'Generating concept explanations and rationale...',
   'Formatting interactive active-recall flashcards...',
@@ -35,7 +35,7 @@ export default function LoadingIndicator() {
       </div>
 
       <p className="loading-subhint">
-        ⚡ Running 100% locally via Ollama with Gemma 3. No cloud APIs, completely private.
+        ⚡ Running 100% locally via Ollama with Gemma 4. No cloud APIs, completely private.
       </p>
     </div>
   );

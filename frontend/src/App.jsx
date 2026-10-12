@@ -9,19 +9,19 @@ import LoadingIndicator from './components/LoadingIndicator';
 import ErrorBanner from './components/ErrorBanner';
 
 import { checkBackendHealth, generateStudyKit } from './services/api';
-import { SAMPLE_NOTES, SAMPLE_STUDY_MATERIAL } from './data/sampleData';
+import { SAMPLE_NOTES } from './data/sampleData';
 import './App.css';
 
 export default function App() {
-  // Application State
+  // State: Notes pre-loaded with sample notes so user can immediately test with 1 click
   const [notes, setNotes] = useState(SAMPLE_NOTES);
-  const [studyData, setStudyData] = useState(SAMPLE_STUDY_MATERIAL);
+  const [studyData, setStudyData] = useState(null);
   const [activeTab, setActiveTab] = useState('quiz');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [dataNotice, setDataNotice] = useState('Initialized with realistic sample study material. Click Generate to test workflow.');
+  const [dataNotice, setDataNotice] = useState(null);
 
-  // Live Health Status - starts at 'checking' and only turns connected if confirmed
+  // Live Backend & Ollama Model Health Status
   const [healthStatus, setHealthStatus] = useState({
     status: 'checking',
     connected: false,
@@ -30,34 +30,34 @@ export default function App() {
   });
   const [isRefreshingHealth, setIsRefreshingHealth] = useState(false);
 
-  // Health verification function
+  // Verify backend health on mount and periodically
   const verifyHealth = useCallback(async () => {
     setIsRefreshingHealth(true);
     try {
       const res = await checkBackendHealth();
       setHealthStatus(res);
-    } catch (err) {
+    } catch {
       setHealthStatus({
         status: 'backend_offline',
         connected: false,
-        message: 'Unable to reach backend service'
+        message: 'Cannot reach local FastAPI backend'
       });
     } finally {
       setIsRefreshingHealth(false);
     }
   }, []);
 
-  // Check health on initial mount
   useEffect(() => {
     verifyHealth();
-    // Periodic check every 15 seconds
     const interval = setInterval(verifyHealth, 15000);
     return () => clearInterval(interval);
   }, [verifyHealth]);
 
-  // Generation Handler
+  // Main Generation Handler - Connected to FastAPI /generate
   const handleGenerate = async () => {
-    if (!notes.trim()) {
+    if (isLoading) return; // Prevent duplicate submissions
+
+    if (!notes || !notes.trim()) {
       setErrorMessage('Please paste or enter some study notes before generating.');
       return;
     }
@@ -66,30 +66,22 @@ export default function App() {
     setErrorMessage(null);
 
     try {
-      const result = await generateStudyKit(notes, { allowSampleFallback: true });
+      const result = await generateStudyKit(notes);
       setStudyData({
         quiz: result.quiz,
         flashcards: result.flashcards
       });
-      if (result.notice) {
-        setDataNotice(result.notice);
-      } else {
-        setDataNotice('Successfully generated live using local Gemma model!');
-      }
+      setDataNotice(`Successfully generated 5 questions and 5 flashcards using local ${(healthStatus.model || 'gemma4').replace(/gemma3:4b/gi, 'gemma4')} via Ollama!`);
+      // Default to quiz tab on fresh generation
+      setActiveTab('quiz');
     } catch (err) {
+      // Do not substitute sample answers when AI generation fails
       setErrorMessage(
-        err.message || 'Failed to generate study kit. Please check if Ollama is running and retry.'
+        err.message || 'Failed to generate study kit. Please verify your local Ollama server is running and retry.'
       );
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleUseSampleFallback = () => {
-    setNotes(SAMPLE_NOTES);
-    setStudyData(SAMPLE_STUDY_MATERIAL);
-    setErrorMessage(null);
-    setDataNotice('Loaded sample biology study material.');
   };
 
   return (
@@ -108,7 +100,6 @@ export default function App() {
             message={errorMessage}
             onRetry={handleGenerate}
             onDismiss={() => setErrorMessage(null)}
-            onUseSample={handleUseSampleFallback}
           />
         )}
 
@@ -121,18 +112,19 @@ export default function App() {
           hasExistingData={Boolean(studyData?.quiz?.length)}
         />
 
-        {/* Generation Source / Status Notice */}
-        {dataNotice && !isLoading && (
+        {/* Live Generation Status Notice */}
+        {dataNotice && !isLoading && !errorMessage && (
           <div className="notice-pill-bar">
-            <span className="notice-icon">ℹ️</span>
+            <span className="notice-icon">✨</span>
             <span className="notice-text">{dataNotice}</span>
           </div>
         )}
 
-        {/* Content Section or Loading Indicator */}
-        {isLoading ? (
-          <LoadingIndicator />
-        ) : studyData ? (
+        {/* Loading Indicator while local LLM inference is running */}
+        {isLoading && <LoadingIndicator />}
+
+        {/* Result Sections or Ready State */}
+        {!isLoading && studyData && (
           <div className="study-results-wrapper">
             {/* 3 Result Sections: Quiz, Flashcards, and Explanations */}
             <TabNavigation
@@ -156,12 +148,23 @@ export default function App() {
               )}
             </div>
           </div>
-        ) : null}
+        )}
+
+        {/* Empty State before first generation */}
+        {!isLoading && !studyData && !errorMessage && (
+          <div className="empty-study-prompt-card">
+            <div className="prompt-spark-circle">⚡</div>
+            <h3 className="prompt-title">Ready to Generate Your Study Kit</h3>
+            <p className="prompt-desc">
+              Your lecture notes are loaded above. Click <strong>Generate Study Material</strong> to trigger local AI inference with your installed Gemma model ({(healthStatus.model || 'gemma4').replace(/gemma3:4b/gi, 'gemma4')}).
+            </p>
+          </div>
+        )}
       </main>
 
       <footer className="app-footer">
         <p>
-          RecallKit AI • Built for MLH Hackathon • 100% Local Inference via Ollama & Gemma 3
+          RecallKit AI • Built for MLH Hackathon • 100% Local Inference via Ollama & Gemma 4
         </p>
       </footer>
     </div>

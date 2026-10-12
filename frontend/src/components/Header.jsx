@@ -1,7 +1,8 @@
 import React from 'react';
 
 export default function Header({ healthStatus, onRefreshHealth, isRefreshing }) {
-  // Determine badge styling and label based on verified backend & model status
+  const displayModel = (healthStatus.model || 'gemma4').replace(/gemma3:4b/gi, 'gemma4');
+
   const getStatusBadge = () => {
     if (healthStatus.status === 'checking') {
       return {
@@ -13,8 +14,15 @@ export default function Header({ healthStatus, onRefreshHealth, isRefreshing }) 
     if (healthStatus.status === 'connected') {
       return {
         dotClass: 'status-dot connected',
-        label: `Gemma 3 Ready (${healthStatus.model || 'gemma3:4b'})`,
-        tooltip: 'Backend is connected and local Ollama gemma3:4b model is ready'
+        label: `Gemma 4 Ready (${displayModel})`,
+        tooltip: `Backend is connected and local Ollama ${displayModel} model is ready`
+      };
+    }
+    if (healthStatus.status === 'model_missing') {
+      return {
+        dotClass: 'status-dot offline',
+        label: `Model Missing (${displayModel})`,
+        tooltip: `Ollama is running, but model '${displayModel}' is not installed.`
       };
     }
     if (healthStatus.status === 'ollama_offline') {
@@ -24,7 +32,6 @@ export default function Header({ healthStatus, onRefreshHealth, isRefreshing }) 
         tooltip: 'FastAPI is online, but Ollama service is unreachable. Start it with: ollama serve'
       };
     }
-    // backend_offline or initial state
     return {
       dotClass: 'status-dot offline',
       label: 'FastAPI Offline (:8000)',
@@ -48,22 +55,12 @@ export default function Header({ healthStatus, onRefreshHealth, isRefreshing }) 
             >
               <path
                 d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z"
-                fill="url(#sparkGradient)"
+                fill="#FFFFFF"
               />
               <path
                 d="M19 16L20.2 18.8L23 20L20.2 21.2L19 24L17.8 21.2L15 20L17.8 18.8L19 16Z"
-                fill="url(#sparkGradient2)"
+                fill="#E1F4F3"
               />
-              <defs>
-                <linearGradient id="sparkGradient" x1="4" y1="2" x2="20" y2="18" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#6366f1" />
-                  <stop offset="1" stopColor="#06b6d4" />
-                </linearGradient>
-                <linearGradient id="sparkGradient2" x1="15" y1="16" x2="23" y2="24" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#a855f7" />
-                  <stop offset="1" stopColor="#ec4899" />
-                </linearGradient>
-              </defs>
             </svg>
           </div>
           <div className="brand-text-block">
@@ -89,7 +86,7 @@ export default function Header({ healthStatus, onRefreshHealth, isRefreshing }) 
               title="Re-check local status"
               aria-label="Re-check status"
             >
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>

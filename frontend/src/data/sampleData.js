@@ -1,15 +1,15 @@
 export const SAMPLE_NOTES = `Cellular Respiration and Energy Production
 
-Cellular respiration is a metabolic pathway that breaks down glucose and produces ATP (adenosine triphosphate), the primary energy currency of cells. The overall process can be summarized into three main stages:
+Cellular respiration breaks down glucose to produce ATP (adenosine triphosphate) in three main stages:
 
 1. Glycolysis:
-Occurs in the cytoplasm (cytosol) of the cell. It is an anaerobic process (does not require oxygen). One 6-carbon molecule of glucose is cleaved into two 3-carbon molecules of pyruvate. Glycolysis consumes 2 ATP molecules and produces 4 ATP molecules, yielding a net gain of 2 ATP and 2 NADH molecules per glucose.
+Takes place in the cytoplasm of the cell. It is an anaerobic process (requires no oxygen) that converts one glucose molecule into two molecules of pyruvate, generating a net gain of 2 ATP and 2 NADH.
 
-2. The Citric Acid Cycle (Krebs Cycle):
-Takes place within the mitochondrial matrix. Before entering the cycle, pyruvate undergoes oxidative decarboxylation to form Acetyl-CoA. Each turn of the cycle produces 1 ATP (or GTP), 3 NADH, 1 FADH2, and releases carbon dioxide (CO2) as a byproduct. Because each glucose produces two pyruvates, the cycle turns twice per glucose.
+2. The Krebs Cycle (Citric Acid Cycle):
+Occurs inside the mitochondrial matrix. Acetyl-CoA is oxidized to produce ATP, NADH, FADH2, and releases carbon dioxide (CO2) as a metabolic byproduct.
 
-3. Oxidative Phosphorylation (Electron Transport Chain & Chemiosmosis):
-Occurs along the inner mitochondrial membrane (cristae). High-energy electrons donated by NADH and FADH2 travel along four protein complexes. As electrons flow, protons (H+) are pumped across the inner membrane into the intermembrane space, creating an electrochemical proton gradient. Protons flow back into the matrix through ATP synthase via chemiosmosis, generating approximately 26 to 28 ATP molecules. Oxygen acts as the final electron acceptor, combining with electrons and protons to form water (H2O).`;
+3. Oxidative Phosphorylation:
+Occurs along the inner mitochondrial membrane. Electrons flow through transport protein complexes, pumping protons across the membrane to drive ATP synthase via chemiosmosis. Oxygen acts as the final electron acceptor, combining with protons to form water (H2O).`;
 
 export const SAMPLE_STUDY_MATERIAL = {
   quiz: [
